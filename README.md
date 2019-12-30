@@ -36,3 +36,4 @@ cd chat_bot
 
 #### References:
 - GPT2: https://openai.com/blog/better-language-models/
+- https://github.com/jcyk/BERT
