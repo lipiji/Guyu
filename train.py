@@ -77,16 +77,6 @@ def run(args, local_rank):
         model.load_state_dict(ckpt['model'])
     model = model.cuda(local_rank)
    
-    weight_decay_params = []
-    no_weight_decay_params = []
-    
-    for name, param in model.named_parameters():
-        if name.endswith('bias') or 'layer_norm' in name:
-            no_weight_decay_params.append(param)
-        else:
-            weight_decay_params.append(param)
-    grouped_params = [{'params':weight_decay_params, 'weight_decay':args.weight_decay},
-                        {'params':no_weight_decay_params, 'weight_decay':0.}]
     if args.world_size > 1:
         torch.manual_seed(1234 + dist.get_rank())
         random.seed(5678 + dist.get_rank())

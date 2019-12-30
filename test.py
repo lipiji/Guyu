@@ -9,7 +9,7 @@ import time
 from biglm import BIGLM
 from data import Vocab, DataLoader, s2t
 
-gpu = 1
+gpu = 0
 def init_model(m_path, device, vocab):
     ckpt= torch.load(m_path, map_location='cpu')
     lm_args = ckpt['args']
@@ -20,8 +20,10 @@ def init_model(m_path, device, vocab):
     lm_model.eval()
     return lm_model, lm_vocab, lm_args
 
-m_path = "./ckpt/epoch0_batch_1449999"
-lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./data/vocab.txt")
+print("loading...")
+m_path = "./model/12L_10G.ckp"
+lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./model/12L_10G.vocab.txt")
+print("done.")
 
 MAX_LEN = 200
 
@@ -242,7 +244,6 @@ def beam_search(s, lm_vocab):
         #break
 
 s = ["丕子"]
-
 print("\ntop_k (k="+str(k)+"):")
 top_k_inc(s)
     

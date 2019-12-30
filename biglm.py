@@ -128,6 +128,6 @@ class BIGLM(nn.Module):
         
         _, pred_y = pred.max(-1)
         tot_tokens = msk.float().sum().item()
-        acc = torch.eq(pred_y, truth).float().sum().item()
+        acc = (torch.eq(pred_y, truth).float()*msk).sum().item() 
         nll, ppl = self.nll_loss(pred, truth, msk) 
         return (pred_y, truth), loss, acc, nll, ppl, tot_tokens, bsz
