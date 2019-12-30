@@ -30,6 +30,6 @@ cd chat_bot
 ```
 
 #### Pre-trained models
-- 12-layer, 768-hidden, 12-heads, Chinese (News + zhwiki) and English (Gigawords + Bookscorpus + enwiki) 
+- 12-layer, 768-hidden, 12-heads, Chinese (News + zhwiki, 200G) and English (Gigawords + Bookscorpus + enwiki, 60G) 
 
-- 24-layer, 768-hidden, 12-heads, Chinese (News + zhwiki) and English (Gigawords + Bookscorpus + enwiki) 
+- 24-layer, 768-hidden, 12-heads, Chinese (News + zhwiki, 200G) and English (Gigawords + Bookscorpus + enwiki, 60G) 
