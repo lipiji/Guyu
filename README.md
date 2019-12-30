@@ -12,7 +12,7 @@ pre-training and fine-tuning framework for text generation
 ```
 
 ```
-./test.sh
+./inference.sh
 ```
 
 #### Web Api:
