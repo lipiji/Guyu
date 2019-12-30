@@ -91,26 +91,7 @@ def run(args, local_rank):
         torch.manual_seed(1234 + dist.get_rank())
         random.seed(5678 + dist.get_rank())
     
-    if args.fp16:
-        try:
-            from apex.optimizers import FP16_Optimizer
-            from apex.optimizers import FusedAdam
-        except ImportError:
-            raise ImportError("Please install apex from https://www.github.com/nvidia/apex to use fp16 training.")
-        optimizer = FusedAdam(grouped_params,
-                              lr=args.lr,
-                              betas=(0.9, 0.999),
-                              eps =1e-6,
-                              bias_correction=False,
-                              max_grad_norm=1.0)
-        optimizer = FP16_Optimizer(optimizer, dynamic_loss_scale=True)
-
-    else:
-        if args.weight_decay > 0:
-            optimizer = AdamWeightDecayOptimizer(grouped_params,
-                           lr=args.lr, betas=(0.9, 0.999), eps=1e-6)
-        else:
-            optimizer = Optim(model.embed_dim, args.lr, args.warmup_steps, torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.998), eps=1e-9))
+    optimizer = Optim(model.embed_dim, args.lr, args.warmup_steps, torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.998), eps=1e-9))
 
     if args.start_from is not None:
         optimizer.load_state_dict(ckpt['optimizer'])
@@ -136,20 +117,13 @@ def run(args, local_rank):
             ntokens_acm += ntokens
             npairs_acm += npairs
             nxs += npairs
-            if args.fp16:
-                optimizer.backward(loss)
-            else:
-                loss.backward()
+            
+            loss.backward()
             if args.world_size > 1:
-                is_normal = average_gradients(model)
-            else:
-                is_normal = True
-            if is_normal:
-                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-                optimizer.step()
-            else:
-                print("gradient: none, gpu: " + str(local_rank))
-                continue
+                average_gradients(model)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            
             if (args.world_size==1 or dist.get_rank() ==0) and batch_acm%args.print_every == -1%args.print_every:
                 print ('batch_acm %d, loss %.3f, acc %.3f, nll %.3f, ppl %.3f, x_acm %d, lr %.6f'\
                         %(batch_acm, loss_acm/args.print_every, acc_acm/ntokens_acm, \
@@ -170,7 +144,6 @@ def init_processes(args, local_rank, fn, backend='nccl'):
 if __name__ == "__main__":
     mp.set_start_method('spawn')
     args = parse_config()
-
     if args.world_size == 1:
         run(args, 0)
         exit(0)
@@ -179,6 +152,5 @@ if __name__ == "__main__":
         p = mp.Process(target=init_processes, args=(args, rank, run, args.backend))
         p.start()
         processes.append(p)
-
     for p in processes:
         p.join()

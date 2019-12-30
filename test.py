@@ -9,16 +9,6 @@ import time
 from biglm import BIGLM
 from data import Vocab, DataLoader, s2t
 
-
-
-def init_seeds():
-    random.seed(123)
-    torch.manual_seed(123)
-    if torch.cuda.is_available():
-        torch.cuda.manual_seed_all(123)
-
-#init_seeds()
-
 gpu = 1
 def init_model(m_path, device, vocab):
     ckpt= torch.load(m_path, map_location='cpu')
@@ -27,14 +17,13 @@ def init_model(m_path, device, vocab):
     lm_model = BIGLM(device, lm_vocab, lm_args.embed_dim, lm_args.ff_embed_dim, lm_args.num_heads, lm_args.dropout, lm_args.layers, 0.1, lm_args.approx)
     lm_model.load_state_dict(ckpt['model'])
     lm_model = lm_model.cuda(device)
+    lm_model.eval()
     return lm_model, lm_vocab, lm_args
 
 m_path = "./ckpt/epoch0_batch_1449999"
-lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./data/train.txt_vocab")
+lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./data/vocab.txt")
 
-lm_model.eval()
-
-MAX_LEN = 150
+MAX_LEN = 200
 
 k = 40
 def top_k_inc(s):
@@ -144,9 +133,6 @@ def top_g(s):
     for i in s:
         print(i)
 
-
-
-
 def greedy(s):
     x, m = s2t(s, lm_vocab)
     x = x.cuda(gpu)
@@ -163,8 +149,6 @@ def greedy(s):
     for i in s:
         print(i)
 
-
-
 def beam_decode(s, x, lm_vocab):
     beam_size = 5
     samples = []
@@ -178,14 +162,6 @@ def beam_decode(s, x, lm_vocab):
 
     for step in range(MAX_LEN):
         y_pred, _ = lm_model.work(ys)
-       
-        '''
-        if step == 0:
-            o_len = ys.size(0)
-            for i in range(o_len-1):
-                last_scores += torch.log(y_pred[i, 0, ys[i, 0]])
-        '''
-
         dict_size = y_pred.shape[-1]
         y_pred = y_pred[-1, :, :] 
 
@@ -265,28 +241,8 @@ def beam_search(s, lm_vocab):
         beam_decode(s[i], x[:len(s[i]), i], lm_vocab)
         #break
 
-#s = ["推水晶,兵线", "马可装备末世", "诸葛亮对线嬴政", "干将莫邪", "复活甲", "貂蝉"]
-#s = ["史树明", "刘晓江", "李丕绩", "闭玮", "王琰", "李华阳", "王龙跃", "王星", "涂兆鹏", "刘乐茂", "黄国平", "韩家龙", "李菁", "张海松"]
-#s = ["机器学习", "腾讯", "中国独角兽会讲汉语"]
-#s = ["gpt2越来越牛逼了", "锅在天上飞", "你才神经病", "这道题怎么解", "关于姐弟恋,大家有神马想说的", "停车坐爱枫林晚", "我觉得男人做饭的时候特别性感", "屌丝终有逆袭日"]
-#s = ["推水晶", "干将莫邪", "诸葛亮", "花木兰", "李元芳", "貂蝉", "马可", "打野", "张飞大招"]
-#s = ["林伟", "李丕绩", "石贝", "徐引擎", "邴立东", "三哥", "李昕", "香港中文大学"]
-#s = ["腾讯副总裁姚星", "姚总", "张老师", "俞老师", "史老师", "刘晓江"]
-#s = ["腾讯AI Lab", "诸葛亮一技能", "东皇大招", "盾山二技能"]
-#s = ["山有木兮木有枝，", "人生若只如初见，", "苟利国家生死以，", "明月几时有？", "明月别枝惊鹊，"]
-s = ["腾讯CEO马化腾"]
-
-#print("\ngreedy:")
-#greedy(s)
-
-#print("\nbeam search:")
-#beam_search(s, lm_vocab)
+s = ["丕子"]
 
 print("\ntop_k (k="+str(k)+"):")
-#top_k(s)
 top_k_inc(s)
-#print("\ntop_p (p="+str(p)+")")
-#top_p(s)
     
-#print("\ntop_pg (["+str(g)+", " + str(k)+ "])")
-#top_g(s)
