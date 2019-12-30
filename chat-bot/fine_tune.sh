@@ -25,4 +25,4 @@ python3 -u train.py --embed_dim 768 \
                       --save_every 1000 \
                       --save_dir ckpt \
                       --backend nccl \
-                      --start_from ../model/12L_10G.ckp
+                      --start_from ../model/12L_10G.ckpt

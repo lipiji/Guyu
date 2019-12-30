@@ -21,7 +21,7 @@ def init_model(m_path, device, vocab):
     return lm_model, lm_vocab, lm_args
 
 print("loading...")
-m_path = "./model/12L_10G.ckp"
+m_path = "./model/12L_10G.ckpt"
 lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./model/12L_10G.vocab.txt")
 print("done.")
 

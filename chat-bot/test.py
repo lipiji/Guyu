@@ -1,3 +1,6 @@
+import sys
+sys.path.append("../")
+
 import torch
 from torch import nn
 import torch.nn.functional as F
@@ -23,8 +26,8 @@ def init_model(m_path, device, vocab):
     lm_model = lm_model.to(device)
     return lm_model, lm_vocab, lm_args
 
-m_path = "./ckpt/epoch12_batch_1289999"
-lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "./model/vocab.txt")
+m_path = "./ckpt/epoch0_batch_3999"
+lm_model, lm_vocab, lm_args = init_model(m_path, gpu, "../model/12L_10G.vocab.txt")
 
 lm_model.eval()
 
