@@ -33,3 +33,6 @@ cd chat_bot
 - 12-layer, 768-hidden, 12-heads, Chinese (News + zhwiki, 200G) and English (Gigawords + Bookscorpus + enwiki, 60G) 
 
 - 24-layer, 768-hidden, 12-heads, Chinese (News + zhwiki, 200G) and English (Gigawords + Bookscorpus + enwiki, 60G) 
+
+#### References:
+- GPT2: https://openai.com/blog/better-language-models/
