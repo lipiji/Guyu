@@ -265,7 +265,7 @@ class SelfAttentionMask(nn.Module):
     def forward(self, size):
         if self.weights is None or size > self.weights.size(0):
             self.weights = SelfAttentionMask.get_mask(size)
-        res = self.weights[:size,:size].cuda(self.device).detach()
+        res = self.weights[:size,:size].to(self.device).detach()
         return res
 
 class LearnedPositionalEmbedding(nn.Module):
@@ -283,7 +283,7 @@ class LearnedPositionalEmbedding(nn.Module):
     def forward(self, input, offset=0):
         """Input is expected to be of size [seq_len x bsz]."""
         seq_len, bsz = input.size()
-        positions = (offset + torch.arange(seq_len)).cuda(self.device)
+        positions = (offset + torch.arange(seq_len)).to(self.device)
         res = self.weights(positions).unsqueeze(1).expand(-1, bsz, -1)
         return res
 
@@ -326,5 +326,5 @@ class SinusoidalPositionalEmbedding(nn.Module):
             )
 
         positions = offset + torch.arange(seq_len)
-        res = self.weights.index_select(0, positions).unsqueeze(1).expand(-1, bsz, -1).cuda(self.device).detach()
+        res = self.weights.index_select(0, positions).unsqueeze(1).expand(-1, bsz, -1).to(self.device).detach()
         return res
