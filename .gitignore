@@ -3,3 +3,4 @@
 /data*/*
 /model*/*
 /ckpt*/*
+/chat-bot/ckpt/

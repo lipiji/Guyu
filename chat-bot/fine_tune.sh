@@ -7,7 +7,7 @@ python3 -u train.py --embed_dim 768 \
                       --train_data ./data/train.txt \
                       --vocab ../model/12L_10G.vocab.txt \
                       --min_occur_cnt 0 \
-                      --batch_size 32 \
+                      --batch_size 16 \
                       --warmup_steps 1 \
                       --lr 1e-2 \
                       --weight_decay 0 \
