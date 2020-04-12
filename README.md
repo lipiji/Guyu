@@ -1,6 +1,8 @@
 # Guyu (谷雨)
 pre-training and fine-tuning framework for text generation
 
+backbone code for "An Empirical Investigation of Pre-Trained Transformer Language Models for Open-Domain Dialogue Generation": https://arxiv.org/abs/2003.04195
+
 #### Pre-training:
 
 ```
