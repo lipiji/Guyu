@@ -56,7 +56,7 @@ def top_k_inc(lm_model, lm_vocab, device, s, k, max_len):
         s = s_
         x, m = s2t(s, lm_vocab)
         x = x.to(device)
-        bidx = torch.ByteTensor(bidx).to(device)
+        bidx = torch.BoolTensor(bidx).to(device)
         incremental_state["bidx"] = bidx
     res += s_
         
@@ -108,7 +108,7 @@ def top_p_inc(lm_model, lm_vocab, device, s, k, p, max_len):
         s = s_
         x, m = s2t(s, lm_vocab)
         x = x.to(device)
-        bidx = torch.ByteTensor(bidx).to(device)
+        bidx = torch.BoolTensor(bidx).to(device)
         incremental_state["bidx"] = bidx
     res += s_
     

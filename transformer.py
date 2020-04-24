@@ -259,7 +259,7 @@ class SelfAttentionMask(nn.Module):
     
     @staticmethod
     def get_mask(size):
-        weights = torch.triu(torch.ones((size, size), dtype = torch.uint8), 1)
+        weights = torch.triu(torch.ones((size, size), dtype = torch.bool), 1)
         return weights
 
     def forward(self, size):
