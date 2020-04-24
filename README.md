@@ -1,6 +1,8 @@
 # Guyu (谷雨)
 pre-training and fine-tuning framework for text generation
 
+backbone code for "An Empirical Investigation of Pre-Trained Transformer Language Models for Open-Domain Dialogue Generation": https://arxiv.org/abs/2003.04195
+
 #### Pre-training:
 
 ```
@@ -34,5 +36,8 @@ cd chat_bot
 
 - 24-layer, 768-hidden, 12-heads, Chinese (News + zhwiki, 200G) and English (Gigawords + Bookscorpus + enwiki, 60G) 
 
+- download them: https://github.com/lipiji/Guyu/tree/master/model
+
 #### References:
 - GPT2: https://openai.com/blog/better-language-models/
+- https://github.com/jcyk/BERT
