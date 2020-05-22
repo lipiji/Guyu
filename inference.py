@@ -21,6 +21,7 @@ def init_model(m_path, device, vocab):
     lm_model.eval()
     return lm_model, lm_vocab, lm_args
 
+@torch.no_grad()
 def top_k_inc(lm_model, lm_vocab, device, s, k, max_len):
     start = time.time()
     incremental_state = None
