@@ -22,6 +22,7 @@ Example: chat-bot
 
 ```
 cd chat_bot
+./prepare_data.sh
 ./fine_tune.sh
 ./inference.sh
 ```
