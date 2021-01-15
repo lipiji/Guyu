@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import torch.multiprocessing as mp
 
 from biglm import BIGLM
-from data import Vocab, DataLoader
+from data import Vocab, DataLoader, s2xy
 from adam import AdamWeightDecayOptimizer
 from optim import Optim
 
@@ -22,6 +22,7 @@ def parse_config():
     parser.add_argument('--dropout', type=float)
 
     parser.add_argument('--train_data', type=str)
+    parser.add_argument('--dev_data', type=str)
     parser.add_argument('--vocab', type=str)
     parser.add_argument('--min_occur_cnt', type=int)
     parser.add_argument('--batch_size', type=int)
@@ -33,6 +34,7 @@ def parse_config():
     parser.add_argument('--min_len', type=int)
     parser.add_argument('--print_every', type=int)
     parser.add_argument('--save_every', type=int)
+    parser.add_argument('--epoch', type=int)
     parser.add_argument('--start_from', type=str, default=None)
     parser.add_argument('--save_dir', type=str)
 
@@ -64,6 +66,43 @@ def average_gradients(model):
             break
     return normal
 
+def eval_epoch(lm_args, model, lm_vocab, local_rank, label, batch_acm):
+    ds = []
+    with open(lm_args.dev_data, "r") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                ds.append(line)
+
+    batch_size = 10
+    batches = round(len(ds) / batch_size)
+    idx = 0
+    avg_nll = 0.
+    avg_ppl = 0.
+    avg_acc = 0.
+    count_bsz = 0.
+    count_tok = 0.
+    while idx < len(ds):
+        cplb = ds[idx:idx + batch_size]
+        ys_truth, ys_inp, msk = s2xy(cplb, lm_vocab, lm_args.max_len, lm_args.min_len)
+
+        ys_truth = ys_truth.cuda(local_rank)
+        ys_inp = ys_inp.cuda(local_rank)
+        msk = msk.cuda(local_rank)
+
+        acc, nll, ppl, toks, bsz = model.ppl(ys_truth, ys_inp, msk)
+    
+        avg_acc += acc
+        avg_nll += nll
+        avg_ppl += ppl
+        count_bsz += bsz
+        count_tok += toks
+
+        idx += batch_size
+    
+    print ('validating: label %s, batch_acm %d, acc %.6f, nll %.6f, ppl %.6f'\
+        %(label, batch_acm, avg_acc/count_tok, avg_nll/count_bsz, avg_ppl/count_bsz), flush=True)
+
 def run(args, local_rank):
     """ Distributed Synchronous """
     torch.manual_seed(1234)
@@ -91,6 +130,8 @@ def run(args, local_rank):
     batch_acm = 0
     acc_acm, nll_acm, ppl_acm, ntokens_acm, nxs, npairs_acm, loss_acm = 0., 0., 0., 0., 0., 0., 0.
     while True:
+        if train_data.epoch_id > args.epoch:
+            break
         model.train()
         for truth, inp, msk in train_data:
             batch_acm += 1
@@ -119,10 +160,18 @@ def run(args, local_rank):
                         %(batch_acm, loss_acm/args.print_every, acc_acm/ntokens_acm, \
                         nll_acm/nxs, ppl_acm/nxs, npairs_acm, optimizer._rate), flush=True)
                 acc_acm, nll_acm, ppl_acm, ntokens_acm, loss_acm, nxs = 0., 0., 0., 0., 0., 0.
+            
             if (args.world_size==1 or dist.get_rank() ==0) and batch_acm%args.save_every == -1%args.save_every:
                 if not os.path.exists(args.save_dir):
                     os.mkdir(args.save_dir)
                 torch.save({'args':args, 'model':model.state_dict(), 'optimizer':optimizer.state_dict()}, '%s/epoch%d_batch_%d'%(args.save_dir, train_data.epoch_id, batch_acm))
+                
+                model.eval()
+                eval_epoch(args, model, vocab, local_rank, "epoch-" + str(train_data.epoch_id) + "-acm-" + str(batch_acm), batch_acm)
+                model.train()
+
+
+
 
 def init_processes(args, local_rank, fn, backend='nccl'):
     """ Initialize the distributed environment. """

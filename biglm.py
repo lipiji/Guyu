@@ -65,6 +65,25 @@ class BIGLM(nn.Module):
         ppl = 2 ** cost
         return cost.sum().item(), ppl.sum().item()
 
+    def ppl(self, truth, inp, msk):
+        seq_len, bsz = inp.size()
+        self_attn_mask = self.attn_mask(seq_len)
+        x = self.tok_embed(inp) + self.pos_embed(inp)
+        x = self.emb_layer_norm(x)
+        padding_mask = torch.eq(truth, self.vocab.padding_idx)
+        if not padding_mask.any():
+            padding_mask = None
+        for layer in self.layers:
+            x, _ ,_ = layer(x, self_padding_mask=padding_mask, self_attn_mask = self_attn_mask)
+
+        x = self.one_more_layer_norm(gelu(self.one_more(x)))
+        pred = torch.softmax(self.out_proj(x), -1)
+        _, pred_y = pred.max(-1)
+        tot_tokens = msk.float().sum().item()
+        acc = (torch.eq(pred_y, truth).float()*msk).sum().item() 
+        nll, ppl = self.nll_loss(pred, truth, msk) 
+        return acc, nll, ppl, tot_tokens, bsz
+    
     def work(self, inp):
         seq_len, bsz = inp.size()
         self_attn_mask = self.attn_mask(seq_len)

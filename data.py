@@ -17,11 +17,6 @@ def ListsToTensor(xs, vocab=None):
         ys.append(y)
     return ys
 
-def _back_to_text_for_check(x, vocab):
-    w = x.t().tolist()
-    for sent in vocab.idx2token(w):
-        print (' '.join(sent))
-    
 def batchify(data, vocab):
     truth, inp, msk = [], [], []
     for x in data:
@@ -44,6 +39,23 @@ def s2t(strs, vocab):
     msk = torch.FloatTensor(ListsToTensor(msk)).t_().contiguous()
     return inp, msk
 
+def s2xy(lines, vocab, max_len, min_len):
+    data = parse_lines(lines, max_len, min_len)
+    return batchify(data, vocab)  
+
+def parse_lines(lines, max_len, min_len):
+    data = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        tokens = line.split()
+        if len(tokens) > max_len:
+            tokens = tokens[:max_len]
+        if len(tokens) >= min_len:
+            data.append(tokens)
+    return data
+
 class DataLoader(object):
     def __init__(self, vocab, filename, batch_size, max_len, min_len):
         self.batch_size = batch_size
@@ -64,16 +76,7 @@ class DataLoader(object):
             self.stream = open(self.filename, encoding='utf8')
             lines = self.stream.readlines(BUFSIZE)
 
-        data = []
-        for line in lines[:-1]: #the last sent may be imcomplete
-            line = line.strip()
-            if not line:
-                continue
-            tokens = line.split()
-            if len(tokens) > self.max_len:
-                tokens = tokens[:self.max_len]
-            if len(tokens) >= self.min_len:
-                data.append(tokens)
+        data = parse_lines(lines[:-1], self.max_len, self.min_len) #the last sent may be imcomplete
         random.shuffle(data)
         
         idx = 0
