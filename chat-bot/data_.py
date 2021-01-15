@@ -38,6 +38,37 @@ def s2t(strs, vocab):
     msk = torch.FloatTensor(ListsToTensor(msk)).t_().contiguous()
     return inp, msk
 
+def s2xy(lines, vocab, max_len_x, min_len_x, max_len_y, min_len_y):
+    data = parse_lines(lines, max_len_x, min_len_x, max_len_y, min_len_y)
+    return batchify(data, vocab)  
+
+def parse_lines(lines, max_len_x, min_len_x, max_len_y, min_len_y):
+    data = []
+    for line in lines:
+        line = line.strip() # x1x2 \t y1y2
+        if not line:
+            continue
+        fs = line.split("\t")
+        if len(fs) != 2:
+            continue
+        tokens_x = [w for w in fs[0]]
+        tokens_y = [w for w in fs[1]]
+
+        if len(tokens_x) > max_len_x:
+            tokens_x = tokens_x[:max_len_x]
+        if len(tokens_x) < min_len_x:
+            continue
+
+        if len(tokens_y) > max_len_y:
+            tokens_y = tokens_y[:max_len_y]
+        if len(tokens_y) < min_len_y:
+            continue
+            
+        data.append((tokens_x + [BOS], tokens_y + [EOS]))
+        
+    return data
+
+
 class DataLoader(object):
     def __init__(self, vocab, filename, batch_size, max_len_x, min_len_x, max_len_y, min_len_y):
         self.batch_size = batch_size
@@ -60,29 +91,7 @@ class DataLoader(object):
             self.stream = open(self.filename, encoding='utf8')
             lines = self.stream.readlines(BUFSIZE)
 
-        data = []
-        for line in lines[:-1]: # the last sent may be imcomplete
-            line = line.strip() # x1x2 \t y1y2
-            if not line:
-                continue
-            fs = line.split("\t")
-            if len(fs) != 2:
-                continue
-            tokens_x = [w for w in fs[0]]
-            tokens_y = [w for w in fs[1]]
-
-            if len(tokens_x) > self.max_len_x:
-                tokens_x = tokens_x[:self.max_len_x]
-            if len(tokens_x) < self.min_len_x:
-                continue
-
-            if len(tokens_y) > self.max_len_y:
-                tokens_y = tokens_y[:self.max_len_y]
-            if len(tokens_y) < self.min_len_y:
-                continue
-            
-            data.append((tokens_x + [BOS], tokens_y + [EOS]))
-        
+        data = parse_lines(lines[:-1], self.max_len_x, self.min_len_x, self.max_len_y, self.min_len_y)
         random.shuffle(data)
         
         idx = 0

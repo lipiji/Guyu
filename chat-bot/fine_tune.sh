@@ -5,6 +5,7 @@ python3 -u train.py --embed_dim 768 \
                       --layers 12 \
                       --dropout 0.2 \
                       --train_data ./data/train.txt \
+                      --dev_data ./data/dev.txt \
                       --vocab ../model/12L_10G.vocab.txt \
                       --min_occur_cnt 0 \
                       --batch_size 16 \
@@ -22,7 +23,8 @@ python3 -u train.py --embed_dim 768 \
                       --MASTER_ADDR localhost \
                       --MASTER_PORT 28512 \
                       --print_every 100 \
-                      --save_every 1000 \
+                      --save_every 10000 \
+                      --epoch 100 \
                       --save_dir ckpt \
                       --backend nccl \
                       --start_from ../model/12L_10G.ckpt
