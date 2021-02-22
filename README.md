@@ -23,13 +23,7 @@ torch>=1.0
 
 ```
 ./prepare_data.sh
-```
-
-```
 ./train.sh
-```
-
-```
 ./inference.sh
 ```
 
