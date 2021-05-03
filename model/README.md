@@ -3,7 +3,7 @@ download the pre-trained 12Layer Chinese language model:
 - Trained on 200G corpus：https://drive.google.com/file/d/1ohMdkHFeJ_bcD8T6AN0P8KRnJUMXIoJr/view?usp=sharing
 
 download the pre-trained 24Layer Chinese language model:
-- Trained on 200G corpus：
+- Trained on 200G corpus：https://drive.google.com/file/d/1plQ8lUErO79pqG6lhT1lfcohDytjSIov/view?usp=sharing
 
 download the pre-trained 12Layer English language model:
 
