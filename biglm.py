@@ -3,7 +3,9 @@ from torch import nn
 import torch.nn.functional as F
 
 from utils import gelu, LayerNorm
-from transformer import TransformerLayer, Embedding, LearnedPositionalEmbedding, SelfAttentionMask
+from transformer_post import TransformerLayer, Embedding, LearnedPositionalEmbedding, SelfAttentionMask
+# more than 12 layers
+#from transformer_pre import TransformerLayer, Embedding, LearnedPositionalEmbedding, SelfAttentionMask
 from label_smoothing import LabelSmoothing 
 
 class BIGLM(nn.Module):
