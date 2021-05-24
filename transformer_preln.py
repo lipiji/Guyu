@@ -53,7 +53,7 @@ class TransformerLayer(nn.Module):
             external_attn = None
 
         residual = x
-         = self.ff_layer_norm(x)
+        x = self.ff_layer_norm(x)
         x = gelu(self.fc1(x))
         x = F.dropout(x, p=self.dropout, training=self.training)
         x = self.fc2(x)
